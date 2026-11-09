@@ -559,20 +559,21 @@ menupopup[placespopup="true"] :is(menu, menuitem, .bookmark-item):is([disabled],
    cell, but the background keeps the full cell height (SuperPins' "same
    height" option pins it there too). The inset therefore only widens the gaps
    across: column gap + 4px across, column gap alone down (8px vs 4px by
-   default). Keep the 2px side insets, drop the vertical shift, and add those
-   4px to the row gap. The column gap is untouched, because Zen's auto-fit grid
-   drops a column when it grows. */
+   default). Use 1px side insets, drop the vertical shift, and add the insets
+   to the row gap: 4px + 2 * 1px = 6px both ways (8px felt too loose). The
+   column gap is untouched, because Zen's auto-fit grid drops a column when it
+   grows. */
 :root[zen-sidebar-expanded="true"] .zen-essentials-container {
     /* Zen's column gap is 4px. */
-    row-gap: calc(4px + 2 * 2px) !important;
+    row-gap: calc(4px + 2 * 1px) !important;
 
     /* SuperPins' gap choice sets both gaps to --essentials-gap. */
     @media -moz-pref("uc.essentials.gap") {
-        row-gap: calc(var(--essentials-gap, 4px) + 2 * 2px) !important;
+        row-gap: calc(var(--essentials-gap, 4px) + 2 * 1px) !important;
     }
 
     .tabbrowser-tab[zen-essential="true"] .tab-background {
-        margin: 0 2px !important;
+        margin: 0 1px !important;
     }
 }
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.35 - 2026-11-09
+
+- Tighten Essentials spacing to 6px across and down (was 8px). Tiles are 2px wider; columns are unchanged.
+
 ## 1.7.34 - 2026-11-09
 
 - Space Essentials evenly: 8px across and down instead of 8px across and 4px down. Zen's 2px tile inset only widened the gaps across, because the tile background keeps the full cell height. The row gap now adds those insets; the column gap, column count and tile sizes are unchanged, and a SuperPins gap choice stays even too.
