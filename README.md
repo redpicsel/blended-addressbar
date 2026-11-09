@@ -62,7 +62,7 @@ Corner shape follows Zen's `layout.css.corner-shape.enabled` setting and `--zen-
 - `uc.blended-addressbar.compact-sidebar-window-controls.disabled`: on macOS, keep the window controls in the addressbar row while the full-height compact sidebar is in use. By default they move to the top of the sidebar and appear only with it. Disabled by default; has no effect when the sidebar stays below the addressbar.
 - `uc.blended-addressbar.frame-shadow`: choose the browser frame shadow preset: standard, minimal, or medium. Minimal adds a 0.5pt white inner highlight and a black outer shadow, both at 15% opacity, with a 0.5pt outer edge.
 
-To blur the page behind the compact sidebar, enable Zen's `zen.theme.acrylic-sidebar` in `about:config`. The mod then lightens the sidebar's background layers (about 65% opaque instead of Zen's ~92%) so the blur is visible while text stays readable over white pages.
+To blur the page behind the compact sidebar, enable Zen's `zen.theme.acrylic-sidebar` in `about:config`. The mod then lightens the sidebar's background layers (75% opaque instead of Zen's ~92%) so the blur is visible while text stays readable over white pages.
 
 ### Loading indicator
 
