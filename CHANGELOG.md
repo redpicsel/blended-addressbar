@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.34 - 2026-11-09
+
+- Space Essentials evenly: 8px across and down instead of 8px across and 4px down. Zen's 2px tile inset only widened the gaps across, because the tile background keeps the full cell height. The row gap now adds those insets; the column gap, column count and tile sizes are unchanged, and a SuperPins gap choice stays even too.
+
 ## 1.7.33 - 2026-11-09
 
 - Make the acrylic compact sidebar slightly more opaque: 75% instead of ~65% (61% base, 60% of Zen's tint), with ~6.4:1 text contrast over white pages.

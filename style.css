@@ -555,6 +555,27 @@ menupopup[placespopup="true"] :is(menu, menuitem, .bookmark-item):is([disabled],
     padding-inline-start: clamp(8px, var(--blended-addressbar-frame-radius), 16px) !important;
 }
 
+/* Essentials grid: Zen insets each tile's background 2px inside its grid
+   cell, but the background keeps the full cell height (SuperPins' "same
+   height" option pins it there too). The inset therefore only widens the gaps
+   across: column gap + 4px across, column gap alone down (8px vs 4px by
+   default). Keep the 2px side insets, drop the vertical shift, and add those
+   4px to the row gap. The column gap is untouched, because Zen's auto-fit grid
+   drops a column when it grows. */
+:root[zen-sidebar-expanded="true"] .zen-essentials-container {
+    /* Zen's column gap is 4px. */
+    row-gap: calc(4px + 2 * 2px) !important;
+
+    /* SuperPins' gap choice sets both gaps to --essentials-gap. */
+    @media -moz-pref("uc.essentials.gap") {
+        row-gap: calc(var(--essentials-gap, 4px) + 2 * 2px) !important;
+    }
+
+    .tabbrowser-tab[zen-essential="true"] .tab-background {
+        margin: 0 2px !important;
+    }
+}
+
 /* Zen's acrylic compact sidebar (zen.theme.acrylic-sidebar) blurs the page
    behind it, but stacks an 80% base under its 60% theme tint (::after), about
    92% opaque, so the blur barely shows. Use a 61% base and 60% of the tint:
