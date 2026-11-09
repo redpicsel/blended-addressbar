@@ -64,20 +64,20 @@ function countOccurrences(value, needle) {
   return value.split(needle).length - 1;
 }
 
-test('release metadata stays synchronized at version 1.7.34', () => {
+test('release metadata stays synchronized at version 1.7.35', () => {
   const theme = JSON.parse(read('theme.json'));
   const script = read('blended-bar.uc.js');
   const marketplace = read('MARKETPLACE.md');
   const changelog = read('CHANGELOG.md');
 
-  assert.equal(theme.version, '1.7.34');
-  assert.equal(theme.updatedAt, '2026-11-09T13:41:00Z');
+  assert.equal(theme.version, '1.7.35');
+  assert.equal(theme.updatedAt, '2026-11-09T13:46:00Z');
   assert.equal(theme.image, 'https://raw.githubusercontent.com/redpicsel/blended-addressbar/main/marketplace-preview.png');
-  assert.match(script, /\/\/ @version\s+1\.7\.34/);
-  assert.match(marketplace, /Version: `1\.7\.34`/);
-  assert.match(marketplace, /"version": "1\.7\.34"/);
-  assert.match(marketplace, /"updatedAt": "2026-11-09T13:41:00Z"/);
-  assert.match(changelog, /## 1\.7\.34 - 2026-11-09/);
+  assert.match(script, /\/\/ @version\s+1\.7\.35/);
+  assert.match(marketplace, /Version: `1\.7\.35`/);
+  assert.match(marketplace, /"version": "1\.7\.35"/);
+  assert.match(marketplace, /"updatedAt": "2026-11-09T13:46:00Z"/);
+  assert.match(changelog, /## 1\.7\.35 - 2026-11-09/);
 });
 
 test('browser window tint bridges page colors through native Zen window theme variables', () => {
@@ -698,12 +698,12 @@ test('essentials grid spaces tiles evenly in both directions', () => {
   const start = css.indexOf(':root[zen-sidebar-expanded="true"] .zen-essentials-container {');
   const full = css.slice(start, css.indexOf('\n}\n', start));
 
-  // Visible gap across = column gap + 2 * 2px side insets; down = row gap.
-  // Zen's column gap is 4px, so the row gap becomes 8px.
-  assert.match(block, /row-gap:\s*calc\(4px \+ 2 \* 2px\)\s*!important/);
+  // Visible gap across = column gap + 2 * 1px side insets; down = row gap.
+  // Zen's column gap is 4px, so both come to 6px.
+  assert.match(block, /row-gap:\s*calc\(4px \+ 2 \* 1px\)\s*!important/);
   // A SuperPins gap choice sets both gaps to --essentials-gap.
-  assert.match(full, /@media -moz-pref\("uc\.essentials\.gap"\)\s*\{\s*row-gap:\s*calc\(var\(--essentials-gap,\s*4px\) \+ 2 \* 2px\)\s*!important/);
-  assert.match(full, /\.tabbrowser-tab\[zen-essential="true"\] \.tab-background\s*\{\s*margin:\s*0 2px\s*!important/);
+  assert.match(full, /@media -moz-pref\("uc\.essentials\.gap"\)\s*\{\s*row-gap:\s*calc\(var\(--essentials-gap,\s*4px\) \+ 2 \* 1px\)\s*!important/);
+  assert.match(full, /\.tabbrowser-tab\[zen-essential="true"\] \.tab-background\s*\{\s*margin:\s*0 1px\s*!important/);
   // Zen's auto-fit grid loses a column when the column gap grows.
   assert.doesNotMatch(full, /column-gap|(^|[^-])gap:\s*\d/m);
 });
