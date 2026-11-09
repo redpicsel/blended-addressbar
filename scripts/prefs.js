@@ -2,7 +2,7 @@ var BlendedAddressbarModule = ((options) => {
   'use strict';
 
   options = options || {};
-  const loadbarModeFallback = 'glow';
+  const loadbarModeFallback = 'default';
   const loadbarModeValues = Object.freeze(new Set(['default', 'progress', 'glow', 'edge']));
   const getServices = typeof options.getServices === 'function'
     ? options.getServices

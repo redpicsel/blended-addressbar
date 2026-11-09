@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           Blended Addressbar
 // @description    Adaptive header color for Zen URL bar
-// @version        1.7.30
+// @version        1.7.31
 // ==/UserScript==
 
 (() => {
@@ -38,7 +38,7 @@
   const loadbarColorPref = `${loadbarPrefBranch}color`;
   const loadbarModePref = `${loadbarPrefBranch}mode`;
   const loadbarFocusColorPref = `${loadbarPrefBranch}focus-color`;
-  const defaultLoadbarMode = 'glow';
+  const defaultLoadbarMode = 'default';
   const addressbarPrefBranch = 'uc.blended-addressbar.';
   const frameRadiusPref = `${addressbarPrefBranch}frame-radius`;
   const frameRadiusDisabledPref = `${addressbarPrefBranch}frame-radius.disabled`;

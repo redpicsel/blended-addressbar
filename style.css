@@ -9,6 +9,11 @@
     --blended-addressbar-color-transition: 0ms linear;
     /* Dual-toolbar URL text, shared by the native field and split-pane fields. */
     --blended-addressbar-url-font-size: calc(1em - 1px);
+    /* The OS window corner as Zen models it: zenThemeModifier.js sets
+       --zen-border-radius (11px on macOS Tahoe, 10px before; or the
+       zen.theme.border-radius override) and Zen scales radii by its squircle
+       factor for corner-shape. */
+    --blended-addressbar-native-window-radius: calc(var(--zen-border-radius, 10px) * var(--zen-squircle-value, 1));
     --blended-addressbar-frame-shadow-standard:
         0 4px 16px rgba(0, 0, 0, 0.14),
         0 1px 4px rgba(0, 0, 0, 0.12);
@@ -495,6 +500,17 @@ menupopup[placespopup="true"] :is(menu, menuitem, .bookmark-item):is([disabled],
                 height: calc(100% - var(--zen-compact-float)) !important;
             }
 
+            /* Reaching the window's top and bottom corners, the sidebar uses the
+               window radius. Zen's own value subtracts a no-padding fix and
+               came out at ~8px against an ~14px window corner. */
+            :root[zen-compact-mode="true"]:not([zen-single-toolbar="true"]):not([customizing]):not([inDOMFullscreen="true"]) #navigator-toolbox:not([animate="true"]) .zen-toolbar-background {
+                &,
+                &::before,
+                &::after {
+                    border-radius: var(--blended-addressbar-native-window-radius) !important;
+                }
+            }
+
             /* macOS window controls stay in the addressbar row. Keep sidebar
                content below them so they never sit on top of Essentials. */
             @media (-moz-platform: macos) {
@@ -522,6 +538,21 @@ menupopup[placespopup="true"] :is(menu, menuitem, .bookmark-item):is([disabled],
     align-items: center;
     z-index: 1;
     -moz-window-dragging: drag;
+}
+
+/* The mono-controls rule further down paints every .titlebar-buttonbox-container
+   with the addressbar foreground. On the sidebar that is the wrong surface:
+   a white page made the dots dark on a dark sidebar. Use the sidebar's icon
+   color, as #zen-sidebar-top-buttons does. */
+:root[data-blended-sidebar-window-controls="true"] #blended-addressbar-sidebar-window-controls > .titlebar-buttonbox-container {
+    color: var(--zen-sidebar-themed-icon-fill, var(--toolbox-textcolor, currentColor)) !important;
+    --zen-toolbar-element-bg: color-mix(in srgb, currentColor 14%, transparent) !important;
+}
+
+/* With the controls gone from the addressbar row, keep its first button clear
+   of the frame's rounded corner. */
+:root[data-blended-sidebar-window-controls="true"] #zen-appcontent-navbar-wrapper #nav-bar {
+    padding-inline-start: clamp(8px, var(--blended-addressbar-frame-radius), 16px) !important;
 }
 
 /* Single-toolbar mode keeps Zen's sidebar addressbar native. */
