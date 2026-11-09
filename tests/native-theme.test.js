@@ -64,20 +64,20 @@ function countOccurrences(value, needle) {
   return value.split(needle).length - 1;
 }
 
-test('release metadata stays synchronized at version 1.7.32', () => {
+test('release metadata stays synchronized at version 1.7.33', () => {
   const theme = JSON.parse(read('theme.json'));
   const script = read('blended-bar.uc.js');
   const marketplace = read('MARKETPLACE.md');
   const changelog = read('CHANGELOG.md');
 
-  assert.equal(theme.version, '1.7.32');
-  assert.equal(theme.updatedAt, '2026-11-09T12:57:00Z');
+  assert.equal(theme.version, '1.7.33');
+  assert.equal(theme.updatedAt, '2026-11-09T13:24:00Z');
   assert.equal(theme.image, 'https://raw.githubusercontent.com/redpicsel/blended-addressbar/main/marketplace-preview.png');
-  assert.match(script, /\/\/ @version\s+1\.7\.32/);
-  assert.match(marketplace, /Version: `1\.7\.32`/);
-  assert.match(marketplace, /"version": "1\.7\.32"/);
-  assert.match(marketplace, /"updatedAt": "2026-11-09T12:57:00Z"/);
-  assert.match(changelog, /## 1\.7\.32 - 2026-11-09/);
+  assert.match(script, /\/\/ @version\s+1\.7\.33/);
+  assert.match(marketplace, /Version: `1\.7\.33`/);
+  assert.match(marketplace, /"version": "1\.7\.33"/);
+  assert.match(marketplace, /"updatedAt": "2026-11-09T13:24:00Z"/);
+  assert.match(changelog, /## 1\.7\.33 - 2026-11-09/);
 });
 
 test('browser window tint bridges page colors through native Zen window theme variables', () => {
@@ -700,10 +700,10 @@ test('acrylic compact sidebar is lighter so its blur shows', () => {
 
   // Only with Zen's own acrylic pref, an active window and transparency allowed.
   assert.match(block, /#navigator-toolbox:not\(\[animate="true"\]\) \.zen-toolbar-background:not\(:-moz-window-inactive\)/);
-  // Zen: 80% base under a 60% tint (~92% opaque). Mod: 50% base, half tint (~65%).
-  assert.match(block, /background:\s*light-dark\(rgb\(233 233 233 \/ 50%\),\s*rgb\(19 19 19 \/ 50%\)\)\s*!important/);
-  assert.match(block, /&::after\s*\{\s*opacity:\s*calc\(var\(--zen-background-opacity,\s*1\) \* 0\.5\)\s*!important/);
-  assert.match(block, /&::before\s*\{\s*opacity:\s*calc\(\(1 - var\(--zen-background-opacity,\s*1\)\) \* 0\.5\)\s*!important/);
+  // Zen: 80% base under a 60% tint (~92% opaque). Mod: 61% base, 60% of the tint (75%).
+  assert.match(block, /background:\s*light-dark\(rgb\(233 233 233 \/ 61%\),\s*rgb\(19 19 19 \/ 61%\)\)\s*!important/);
+  assert.match(block, /&::after\s*\{\s*opacity:\s*calc\(var\(--zen-background-opacity,\s*1\) \* 0\.6\)\s*!important/);
+  assert.match(block, /&::before\s*\{\s*opacity:\s*calc\(\(1 - var\(--zen-background-opacity,\s*1\)\) \* 0\.6\)\s*!important/);
   assert.doesNotMatch(block, /backdrop-filter/, 'keep Zen\'s own blur');
 });
 

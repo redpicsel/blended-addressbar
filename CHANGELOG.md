@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.33 - 2026-11-09
+
+- Make the acrylic compact sidebar slightly more opaque: 75% instead of ~65% (61% base, 60% of Zen's tint), with ~6.4:1 text contrast over white pages.
+
 ## 1.7.32 - 2026-11-09
 
 - Make Zen's acrylic compact sidebar (`zen.theme.acrylic-sidebar`) see-through enough for its blur to show: about 65% opaque instead of ~92%, keeping ~4.6:1 text contrast over white pages. No change while the pref is off, the window is inactive or the system reduces transparency.
