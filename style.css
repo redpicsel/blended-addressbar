@@ -555,6 +555,26 @@ menupopup[placespopup="true"] :is(menu, menuitem, .bookmark-item):is([disabled],
     padding-inline-start: clamp(8px, var(--blended-addressbar-frame-radius), 16px) !important;
 }
 
+/* Zen's acrylic compact sidebar (zen.theme.acrylic-sidebar) blurs the page
+   behind it, but stacks an 80% base under its 60% theme tint (::after), about
+   92% opaque, so the blur barely shows. Halve the tint and drop the base to
+   50%: about 65% opaque. Over a white page that leaves the dark sidebar near
+   rgb(103 103 103), ~4.6:1 for its light text (40% fell to ~3.6:1). Same
+   conditions as Zen's rule: active window, no reduced transparency. */
+@media -moz-pref("zen.theme.acrylic-sidebar") and (not (prefers-reduced-transparency: reduce)) {
+    :root[zen-compact-mode="true"]:not([customizing]):not([inDOMFullscreen="true"]) #navigator-toolbox:not([animate="true"]) .zen-toolbar-background:not(:-moz-window-inactive) {
+        background: light-dark(rgb(233 233 233 / 50%), rgb(19 19 19 / 50%)) !important;
+
+        &::after {
+            opacity: calc(var(--zen-background-opacity, 1) * 0.5) !important;
+        }
+
+        &::before {
+            opacity: calc((1 - var(--zen-background-opacity, 1)) * 0.5) !important;
+        }
+    }
+}
+
 /* Single-toolbar mode keeps Zen's sidebar addressbar native. */
 :root[zen-single-toolbar="true"]:not([customizing]) #zen-appcontent-navbar-wrapper:has(#PersonalToolbar[collapsed]) {
     min-height: 0 !important;

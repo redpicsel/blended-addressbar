@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.32 - 2026-11-09
+
+- Make Zen's acrylic compact sidebar (`zen.theme.acrylic-sidebar`) see-through enough for its blur to show: about 65% opaque instead of ~92%, keeping ~4.6:1 text contrast over white pages. No change while the pref is off, the window is inactive or the system reduces transparency.
+
 ## 1.7.31 - 2026-11-09
 
 - Fix Zen Library (Cmd+Y) freezing half open when the window controls are in the compact sidebar. Zen's Library moves the controls into its header past 60% of its open animation and needs an element next to them; the sidebar host now keeps a hidden anchor there and leaves the controls alone while the Library holds them.

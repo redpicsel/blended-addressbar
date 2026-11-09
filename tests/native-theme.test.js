@@ -64,20 +64,20 @@ function countOccurrences(value, needle) {
   return value.split(needle).length - 1;
 }
 
-test('release metadata stays synchronized at version 1.7.31', () => {
+test('release metadata stays synchronized at version 1.7.32', () => {
   const theme = JSON.parse(read('theme.json'));
   const script = read('blended-bar.uc.js');
   const marketplace = read('MARKETPLACE.md');
   const changelog = read('CHANGELOG.md');
 
-  assert.equal(theme.version, '1.7.31');
-  assert.equal(theme.updatedAt, '2026-11-09T12:15:00Z');
+  assert.equal(theme.version, '1.7.32');
+  assert.equal(theme.updatedAt, '2026-11-09T12:57:00Z');
   assert.equal(theme.image, 'https://raw.githubusercontent.com/redpicsel/blended-addressbar/main/marketplace-preview.png');
-  assert.match(script, /\/\/ @version\s+1\.7\.31/);
-  assert.match(marketplace, /Version: `1\.7\.31`/);
-  assert.match(marketplace, /"version": "1\.7\.31"/);
-  assert.match(marketplace, /"updatedAt": "2026-11-09T12:15:00Z"/);
-  assert.match(changelog, /## 1\.7\.31 - 2026-11-09/);
+  assert.match(script, /\/\/ @version\s+1\.7\.32/);
+  assert.match(marketplace, /Version: `1\.7\.32`/);
+  assert.match(marketplace, /"version": "1\.7\.32"/);
+  assert.match(marketplace, /"updatedAt": "2026-11-09T12:57:00Z"/);
+  assert.match(changelog, /## 1\.7\.32 - 2026-11-09/);
 });
 
 test('browser window tint bridges page colors through native Zen window theme variables', () => {
@@ -690,6 +690,21 @@ test('window controls placement is wired, styled and configurable', () => {
     cssRuleBlock(css, ':root[data-blended-sidebar-window-controls="true"] #zen-appcontent-navbar-wrapper #nav-bar {'),
     /padding-inline-start:\s*clamp\(8px,\s*var\(--blended-addressbar-frame-radius\),\s*16px\)\s*!important/
   );
+});
+
+test('acrylic compact sidebar is lighter so its blur shows', () => {
+  const css = read('style.css');
+  const start = css.indexOf('@media -moz-pref("zen.theme.acrylic-sidebar") and (not (prefers-reduced-transparency: reduce))');
+  assert.notEqual(start, -1, 'missing acrylic sidebar rule');
+  const block = css.slice(start, css.indexOf('\n}\n', start));
+
+  // Only with Zen's own acrylic pref, an active window and transparency allowed.
+  assert.match(block, /#navigator-toolbox:not\(\[animate="true"\]\) \.zen-toolbar-background:not\(:-moz-window-inactive\)/);
+  // Zen: 80% base under a 60% tint (~92% opaque). Mod: 50% base, half tint (~65%).
+  assert.match(block, /background:\s*light-dark\(rgb\(233 233 233 \/ 50%\),\s*rgb\(19 19 19 \/ 50%\)\)\s*!important/);
+  assert.match(block, /&::after\s*\{\s*opacity:\s*calc\(var\(--zen-background-opacity,\s*1\) \* 0\.5\)\s*!important/);
+  assert.match(block, /&::before\s*\{\s*opacity:\s*calc\(\(1 - var\(--zen-background-opacity,\s*1\)\) \* 0\.5\)\s*!important/);
+  assert.doesNotMatch(block, /backdrop-filter/, 'keep Zen\'s own blur');
 });
 
 test('dual-toolbar compact sidebar covers the addressbar row unless disabled', () => {
