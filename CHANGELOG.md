@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.7.31 - 2026-11-09
+
+- Fix Zen Library (Cmd+Y) freezing half open when the window controls are in the compact sidebar. Zen's Library moves the controls into its header past 60% of its open animation and needs an element next to them; the sidebar host now keeps a hidden anchor there and leaves the controls alone while the Library holds them.
+- Keep the window controls visible in the compact sidebar on light pages. They now use the sidebar's icon color instead of the addressbar foreground, which made them dark on a dark sidebar.
+- Add left padding to the addressbar row when the window controls live in the sidebar, so its first button clears the frame's rounded corner.
+- Round the full-height compact sidebar with the macOS window radius as Zen models it (`--zen-border-radius` times its squircle factor, 14.3px on macOS Tahoe) instead of Zen's ~8px compact value.
+- Default the loading indicator to Zen's native loader instead of the URL bar glow. Existing installs keep their saved choice; pick **Default** under **Loading indicator** to switch.
+
 ## 1.7.30 - 2026-11-09
 
 - On macOS, move the window controls out of the addressbar row and into the top of the full-height compact sidebar in dual-toolbar layouts. They appear only while the sidebar is shown. Turn this off with **Keep window controls in the addressbar**.

@@ -64,20 +64,20 @@ function countOccurrences(value, needle) {
   return value.split(needle).length - 1;
 }
 
-test('release metadata stays synchronized at version 1.7.30', () => {
+test('release metadata stays synchronized at version 1.7.31', () => {
   const theme = JSON.parse(read('theme.json'));
   const script = read('blended-bar.uc.js');
   const marketplace = read('MARKETPLACE.md');
   const changelog = read('CHANGELOG.md');
 
-  assert.equal(theme.version, '1.7.30');
-  assert.equal(theme.updatedAt, '2026-11-09T10:59:00Z');
+  assert.equal(theme.version, '1.7.31');
+  assert.equal(theme.updatedAt, '2026-11-09T12:15:00Z');
   assert.equal(theme.image, 'https://raw.githubusercontent.com/redpicsel/blended-addressbar/main/marketplace-preview.png');
-  assert.match(script, /\/\/ @version\s+1\.7\.30/);
-  assert.match(marketplace, /Version: `1\.7\.30`/);
-  assert.match(marketplace, /"version": "1\.7\.30"/);
-  assert.match(marketplace, /"updatedAt": "2026-11-09T10:59:00Z"/);
-  assert.match(changelog, /## 1\.7\.30 - 2026-11-09/);
+  assert.match(script, /\/\/ @version\s+1\.7\.31/);
+  assert.match(marketplace, /Version: `1\.7\.31`/);
+  assert.match(marketplace, /"version": "1\.7\.31"/);
+  assert.match(marketplace, /"updatedAt": "2026-11-09T12:15:00Z"/);
+  assert.match(changelog, /## 1\.7\.31 - 2026-11-09/);
 });
 
 test('browser window tint bridges page colors through native Zen window theme variables', () => {
@@ -227,7 +227,7 @@ test('focused helper modules expose the expected subscript contract', () => {
   assert.equal(prefs.normalizeLoadbarMode('default'), 'default');
   assert.equal(prefs.normalizeLoadbarMode('none'), 'default');
   assert.equal(prefs.normalizeLoadbarMode('progress'), 'progress');
-  assert.equal(prefs.normalizeLoadbarMode('unexpected'), 'glow');
+  assert.equal(prefs.normalizeLoadbarMode('unexpected'), 'default');
 
   const colorUtils = loadScriptModule('color-utils.js', {
     cssSupports: () => true,
@@ -417,8 +417,10 @@ test('remove frame rounding overrides the effective radius without erasing its c
 
 function createWindowControlsDom() {
   class FakeElement {
-    constructor(id = '') {
+    constructor(id = '', localName = 'div') {
       this.id = id;
+      this.localName = localName;
+      this.className = '';
       this.children = [];
       this.parentNode = null;
       this.attributes = new Map();
@@ -432,6 +434,19 @@ function createWindowControlsDom() {
       const siblings = this.parentNode?.children || [];
       return siblings[siblings.indexOf(this) + 1] || null;
     }
+    get previousSibling() {
+      const siblings = this.parentNode?.children || [];
+      return siblings[siblings.indexOf(this) - 1] || null;
+    }
+    // Tag-name selectors only, which is all the module uses.
+    closest(tagName) {
+      for (let node = this; node; node = node.parentNode) {
+        if (node.localName === tagName) return node;
+      }
+      return null;
+    }
+    before(node) { this.parentNode.insertBefore(node, this); }
+    after(node) { this.parentNode.insertBefore(node, this.nextSibling); }
     remove() {
       if (!this.parentNode) return;
       this.parentNode.children.splice(this.parentNode.children.indexOf(this), 1);
@@ -464,7 +479,7 @@ function createWindowControlsDom() {
   const doc = {
     documentElement: new FakeElement('main-window'),
     getElementById: (id) => find(doc.documentElement, id),
-    createElement: () => new FakeElement()
+    createElement: (localName) => new FakeElement('', localName)
   };
   const toolbox = doc.documentElement.appendChild(new FakeElement('navigator-toolbox'));
   const titlebar = toolbox.appendChild(new FakeElement('titlebar'));
@@ -521,6 +536,9 @@ test('window controls move into the full-height compact sidebar on macOS and bac
   assert.equal(buttons.parentNode, host());
   assert.equal(host().parentNode, titlebar);
   assert.equal(titlebar.children[0], host());
+  // A hidden anchor always sits after the controls (see the Zen Library test).
+  assert.deepEqual(host().children.map((child) => child.id || child.className), ['window-controls', 'blended-addressbar-window-controls-anchor']);
+  assert.equal(host().children[1].getAttribute('hidden'), 'true');
   assert.equal(doc.documentElement.getAttribute('data-blended-sidebar-window-controls'), 'true');
   assert.deepEqual(
     prefObservers.map((entry) => entry.name).sort(),
@@ -575,6 +593,51 @@ test('window controls move into the full-height compact sidebar on macOS and bac
   assert.equal(doc.documentElement.hasAttribute('data-blended-sidebar-window-controls'), false);
 });
 
+test('Zen Library can adopt the hosted window controls and give them back', () => {
+  const { doc, buttons } = createWindowControlsDom();
+  const mutationCallbacks = [];
+  class FakeMutationObserver {
+    constructor(callback) { this.callback = callback; }
+    observe() { mutationCallbacks.push(this.callback); }
+    disconnect() {}
+  }
+  const windowControls = loadScriptModule('window-controls.js', {
+    chromeDoc: doc,
+    isMacOS: true,
+    readBoolPref: (name, fallback) => (name === 'zen.view.compact.hide-tabbar' ? true : fallback),
+    getWindowButtons: () => buttons,
+    MutationObserver: FakeMutationObserver
+  });
+  windowControls.observeWindowControlsPlacement(null);
+  const host = doc.getElementById('blended-addressbar-sidebar-window-controls');
+  assert.equal(buttons.parentNode, host);
+
+  // Mirrors ZenLibrary.mjs #adoptWindowButtons. With the controls alone in the
+  // host, `sibling` was null and `.after()` threw, freezing the Library at 63%.
+  const isNext = buttons.nextSibling;
+  const sibling = buttons.nextSibling || buttons.previousSibling;
+  assert.ok(sibling, 'Zen Library needs a sibling next to the controls');
+  const clone = doc.createElement('hbox');
+  if (isNext) sibling.before(clone);
+  else sibling.after(clone);
+  const library = doc.documentElement.appendChild(doc.createElement('zen-library'));
+  const header = library.appendChild(doc.createElement('vbox'));
+  header.appendChild(buttons);
+
+  // While the Library owns them, the module must not take them back.
+  for (const callback of [...mutationCallbacks]) callback([]);
+  windowControls.updateWindowControlsPlacement();
+  assert.equal(buttons.parentNode, header);
+
+  // Mirrors #restoreWindowButtons.
+  clone.remove();
+  if (isNext) sibling.before(buttons);
+  else sibling.after(buttons);
+  assert.equal(buttons.parentNode, host);
+  windowControls.updateWindowControlsPlacement();
+  assert.equal(buttons.parentNode, host);
+});
+
 test('window controls stay in the addressbar outside macOS', () => {
   const { doc, navBar, buttons } = createWindowControlsDom();
   const windowControls = loadScriptModule('window-controls.js', {
@@ -613,6 +676,20 @@ test('window controls placement is wired, styled and configurable', () => {
   assert.match(activeBlock, /top:\s*calc\(var\(--zen-compact-float,\s*0px\) \/ -2\)/);
   assert.match(activeBlock, /height:\s*var\(--zen-toolbar-height\)/);
   assert.match(activeBlock, /-moz-window-dragging:\s*drag/);
+
+  // On the sidebar the dots follow the sidebar icon color, not the addressbar
+  // foreground, and must out-rank the unscoped mono-controls rule.
+  const hostedButtons = ':root[data-blended-sidebar-window-controls="true"] #blended-addressbar-sidebar-window-controls > .titlebar-buttonbox-container {';
+  const monoRule = ':root:not([window-modal-open="true"]):not([zen-single-toolbar="true"]) .titlebar-buttonbox-container {';
+  assert.match(cssRuleBlock(css, hostedButtons), /color:\s*var\(--zen-sidebar-themed-icon-fill,\s*var\(--toolbox-textcolor,\s*currentColor\)\)\s*!important/);
+  assert.match(cssRuleBlock(css, hostedButtons), /--zen-toolbar-element-bg:\s*color-mix\(in srgb,\s*currentColor 14%,\s*transparent\)\s*!important/);
+  assert.match(cssRuleBlock(css, monoRule), /color:\s*var\(--zen-tab-header-foreground,\s*inherit\)\s*!important/);
+
+  // The addressbar row's first button clears the frame's rounded corner.
+  assert.match(
+    cssRuleBlock(css, ':root[data-blended-sidebar-window-controls="true"] #zen-appcontent-navbar-wrapper #nav-bar {'),
+    /padding-inline-start:\s*clamp\(8px,\s*var\(--blended-addressbar-frame-radius\),\s*16px\)\s*!important/
+  );
 });
 
 test('dual-toolbar compact sidebar covers the addressbar row unless disabled', () => {
@@ -640,6 +717,10 @@ test('dual-toolbar compact sidebar covers the addressbar row unless disabled', (
   assert.match(block, /@media not -moz-pref\("zen\.view\.compact\.hide-toolbar"\)/);
   assert.match(block, /:root\[zen-compact-mode="true"\]:not\(\[zen-single-toolbar="true"\]\)[^{]*#navigator-toolbox:not\(\[animate="true"\]\)\s*\{[^}]*margin-top:\s*0\s*!important[^}]*height:\s*calc\(100% - var\(--zen-compact-float\)\)\s*!important/s);
   assert.match(block, /@media \(-moz-platform: macos\)\s*\{[^{]*:not\(\[zen-right-side="true"\]\)[^{]*#titlebar\s*\{[^}]*padding-top:\s*var\(--zen-toolbar-height\)\s*!important/s);
+
+  // The full-height sidebar uses the OS window radius as Zen models it.
+  assert.match(cssRuleBlock(css, ':root {'), /--blended-addressbar-native-window-radius:\s*calc\(var\(--zen-border-radius,\s*10px\) \* var\(--zen-squircle-value,\s*1\)\)/);
+  assert.match(block, /#navigator-toolbox:not\(\[animate="true"\]\) \.zen-toolbar-background\s*\{\s*&,\s*&::before,\s*&::after\s*\{\s*border-radius:\s*var\(--blended-addressbar-native-window-radius\)\s*!important/s);
 });
 
 test('single-toolbar mode frames page content while leaving the sidebar addressbar native', () => {
@@ -974,7 +1055,7 @@ test('loadbar modes customize the native Zen loading progress element', () => {
 
   assert.match(script, /const loadbarModePref = `\$\{loadbarPrefBranch\}mode`/);
   assert.match(script, /const loadbarFocusColorPref = `\$\{loadbarPrefBranch\}focus-color`/);
-  assert.match(script, /const defaultLoadbarMode = 'glow'/);
+  assert.match(script, /const defaultLoadbarMode = 'default'/);
   assert.doesNotMatch(script, /const loadbarModeValues = Object\.freeze/);
   assert.doesNotMatch(script, /loadbarColorSourcePref/);
   assert.doesNotMatch(script, /loadbarColorSourceValues/);
@@ -1075,7 +1156,7 @@ test('loadbar modes customize the native Zen loading progress element', () => {
   assert.match(css, /:root\[inDOMFullscreen="true"\] #zen-loading-progress-bar/);
   assert.doesNotMatch(css, /\.browserSidebarContainer\.deck-selected::before/);
   assert.match(prefs, /uc\.loadbar\.mode/);
-  assert.equal(loadbarModePreference.defaultValue, 'glow');
+  assert.equal(loadbarModePreference.defaultValue, 'default');
   assert.deepEqual(loadbarModePreference.options.map((option) => option.value), ['default', 'progress', 'glow', 'edge']);
   assert.deepEqual(loadbarModePreference.options.map((option) => option.label), ['Default', 'Progress bar', 'URL bar glow', 'Window edge']);
   assert.equal(loadbarColorSourcePreference, undefined);

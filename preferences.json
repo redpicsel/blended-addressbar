@@ -96,7 +96,7 @@
     "property": "uc.loadbar.mode",
     "label": "Loading indicator",
     "type": "dropdown",
-    "defaultValue": "glow",
+    "defaultValue": "default",
     "options": [
       {
         "label": "Default",

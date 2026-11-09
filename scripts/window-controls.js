@@ -19,6 +19,7 @@ var BlendedAddressbarModule = ((options) => {
     || (typeof MutationObserver === 'function' ? MutationObserver : null);
 
   const hostId = 'blended-addressbar-sidebar-window-controls';
+  const anchorClass = 'blended-addressbar-window-controls-anchor';
   const activeAttribute = 'data-blended-sidebar-window-controls';
   const disabledPref = 'uc.blended-addressbar.compact-sidebar-window-controls.disabled';
   const overToolbarDisabledPref = 'uc.blended-addressbar.compact-sidebar-over-toolbar.disabled';
@@ -59,8 +60,26 @@ var BlendedAddressbarModule = ((options) => {
     if (!titlebar) return null;
     const host = chromeDoc.createElement('div');
     host.id = hostId;
+    // Zen Library adopts the controls past 60% of its open animation: it puts
+    // a clone next to `nextSibling || previousSibling` and later restores the
+    // real element there. Without a sibling that call throws and the Library
+    // freezes half open, so keep a hidden anchor next to the controls.
+    const anchor = chromeDoc.createElement('div');
+    anchor.className = anchorClass;
+    anchor.setAttribute('hidden', 'true');
+    host.appendChild(anchor);
     titlebar.prepend(host);
     return host;
+  }
+
+  function getAnchor(host) {
+    return host.children
+      ? Array.from(host.children).find(child => child.className === anchorClass) || null
+      : null;
+  }
+
+  function isAdoptedByLibrary(buttons) {
+    return typeof buttons.closest === 'function' && !!buttons.closest('zen-library');
   }
 
   function restoreWindowButtons(buttons) {
@@ -76,13 +95,15 @@ var BlendedAddressbarModule = ((options) => {
     const root = chromeDoc?.documentElement;
     const buttons = getWindowButtons();
     if (!root || !buttons) return;
+    // The open Library owns the controls until it puts them back itself.
+    if (isAdoptedByLibrary(buttons)) return;
 
     if (shouldHostInSidebar()) {
       const host = getHost(true);
       if (!host) return;
       if (buttons.parentNode !== host) {
         restoreTarget = { parent: buttons.parentNode, nextSibling: buttons.nextSibling };
-        host.appendChild(buttons);
+        host.insertBefore(buttons, getAnchor(host));
       }
       root.setAttribute(activeAttribute, 'true');
       return;

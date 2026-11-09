@@ -64,7 +64,7 @@ Corner shape follows Zen's `layout.css.corner-shape.enabled` setting and `--zen-
 
 ### Loading indicator
 
-- `uc.loadbar.mode`: choose Default, Progress bar, URL bar glow, or Window edge. Default keeps Zen's native loader; the mod defaults to URL bar glow.
+- `uc.loadbar.mode`: choose Default, Progress bar, URL bar glow, or Window edge. Default keeps Zen's native loader and is the default.
 - `uc.loadbar.color`: fallback loadbar color when no page or header color is available.
 - `uc.loadbar.focus-color`: use the browser focus color for Progress bar, URL bar glow, and Window edge instead of the header foreground; enabled by default.
 - `uc.loadbar.iridescent`: add a subtle color shift to the moving URL bar glow; disabled by default. System reduced-motion settings disable the animation and progress transitions.
