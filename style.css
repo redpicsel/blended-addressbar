@@ -555,6 +555,18 @@ menupopup[placespopup="true"] :is(menu, menuitem, .bookmark-item):is([disabled],
     padding-inline-start: clamp(8px, var(--blended-addressbar-frame-radius), 16px) !important;
 }
 
+/* Better Find Bar (ff-better-findbar) fixes the find bar 15px from the top of
+   the window (Zen's <body> has contain: paint), so in the dual-toolbar layout
+   the addressbar row covers it. Measure those 15px from the page's top edge
+   instead (--blended-addressbar-page-top, from scripts/pane-layout.js). Its
+   hidden state still slides 150px up from there, out of view. Without Better
+   Find Bar the native find bar is static and ignores `top`. */
+@media (-moz-pref("better_findbar.vertical_position", "top")) {
+    :root:not([zen-single-toolbar="true"]) findbar {
+        top: calc(var(--blended-addressbar-page-top, 0px) + var(--var-findbar-position-top, 15px)) !important;
+    }
+}
+
 /* Essentials grid: Zen insets each tile's background 2px inside its grid
    cell, but the background keeps the full cell height (SuperPins' "same
    height" option pins it there too). The inset therefore only widens the gaps

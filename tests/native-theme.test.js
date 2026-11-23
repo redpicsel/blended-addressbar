@@ -64,20 +64,20 @@ function countOccurrences(value, needle) {
   return value.split(needle).length - 1;
 }
 
-test('release metadata stays synchronized at version 1.7.35', () => {
+test('release metadata stays synchronized at version 1.7.36', () => {
   const theme = JSON.parse(read('theme.json'));
   const script = read('blended-bar.uc.js');
   const marketplace = read('MARKETPLACE.md');
   const changelog = read('CHANGELOG.md');
 
-  assert.equal(theme.version, '1.7.35');
-  assert.equal(theme.updatedAt, '2026-11-09T13:46:00Z');
+  assert.equal(theme.version, '1.7.36');
+  assert.equal(theme.updatedAt, '2026-11-23T03:16:00Z');
   assert.equal(theme.image, 'https://raw.githubusercontent.com/redpicsel/blended-addressbar/main/marketplace-preview.png');
-  assert.match(script, /\/\/ @version\s+1\.7\.35/);
-  assert.match(marketplace, /Version: `1\.7\.35`/);
-  assert.match(marketplace, /"version": "1\.7\.35"/);
-  assert.match(marketplace, /"updatedAt": "2026-11-09T13:46:00Z"/);
-  assert.match(changelog, /## 1\.7\.35 - 2026-11-09/);
+  assert.match(script, /\/\/ @version\s+1\.7\.36/);
+  assert.match(marketplace, /Version: `1\.7\.36`/);
+  assert.match(marketplace, /"version": "1\.7\.36"/);
+  assert.match(marketplace, /"updatedAt": "2026-11-23T03:16:00Z"/);
+  assert.match(changelog, /## 1\.7\.36 - 2026-11-23/);
 });
 
 test('browser window tint bridges page colors through native Zen window theme variables', () => {
@@ -690,6 +690,49 @@ test('window controls placement is wired, styled and configurable', () => {
     cssRuleBlock(css, ':root[data-blended-sidebar-window-controls="true"] #zen-appcontent-navbar-wrapper #nav-bar {'),
     /padding-inline-start:\s*clamp\(8px,\s*var\(--blended-addressbar-frame-radius\),\s*16px\)\s*!important/
   );
+});
+
+test('pane layout publishes the selected page top and clears it on cleanup', () => {
+  const writes = [];
+  const removals = [];
+  const root = { style: {}, toggleAttribute: () => {}, removeAttribute: () => {} };
+  const layout = loadScriptModule('pane-layout.js', {
+    chromeDoc: {
+      documentElement: root,
+      getElementById: () => null,
+      querySelectorAll: () => [],
+      defaultView: { gBrowser: { selectedBrowser: { getBoundingClientRect: () => ({ top: 42.4 }) } } }
+    },
+    readBoolPref: () => false,
+    removeStylePropertyIfChanged: (style, name) => removals.push([style, name]),
+    setStylePropertyIfChanged: (style, name, value) => writes.push([style, name, value])
+  });
+
+  layout.updatePaneCornerRadii();
+  assert.deepEqual(writes, [[root.style, '--blended-addressbar-page-top', '42px']]);
+  layout.cleanupPaneCornerRadii();
+  assert.ok(removals.some(([style, name]) => style === root.style && name === '--blended-addressbar-page-top'));
+
+  // No tabbrowser yet: nothing is written.
+  const quiet = [];
+  loadScriptModule('pane-layout.js', {
+    chromeDoc: { documentElement: root, getElementById: () => null, querySelectorAll: () => [], defaultView: {} },
+    removeStylePropertyIfChanged: () => false,
+    setStylePropertyIfChanged: (...args) => quiet.push(args)
+  }).updatePaneCornerRadii();
+  assert.deepEqual(quiet, []);
+});
+
+test('Better Find Bar at the top clears the dual-toolbar addressbar', () => {
+  const css = read('style.css');
+  const start = css.indexOf('@media (-moz-pref("better_findbar.vertical_position", "top"))');
+  assert.notEqual(start, -1, 'missing Better Find Bar rule');
+  const block = css.slice(start, css.indexOf('\n}\n', start));
+
+  // Better Find Bar's own 15px top now counts from the page, not the window.
+  assert.match(block, /:root:not\(\[zen-single-toolbar="true"\]\) findbar\s*\{\s*top:\s*calc\(var\(--blended-addressbar-page-top,\s*0px\) \+ var\(--var-findbar-position-top,\s*15px\)\)\s*!important/);
+  // It stays fixed so its slide-up hidden state leaves the window.
+  assert.doesNotMatch(block, /position:/);
 });
 
 test('essentials grid spaces tiles evenly in both directions', () => {

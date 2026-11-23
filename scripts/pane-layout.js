@@ -89,9 +89,20 @@ var BlendedAddressbarModule = ((options) => {
     setStylePropertyIfChanged(root.style, '--blended-addressbar-sidebar-page-width', `${pageBounds.width}px`);
   }
 
+  // The selected page's top edge in window coordinates. Overlays fixed to the
+  // window, such as Better Find Bar's find bar, use it to clear the addressbar
+  // row; in split view it also clears the pane's address field.
+  function updatePageTop() {
+    const root = chromeDoc.documentElement;
+    const top = chromeDoc.defaultView?.gBrowser?.selectedBrowser?.getBoundingClientRect?.().top;
+    if (!root || !Number.isFinite(top)) return;
+    setStylePropertyIfChanged(root.style, '--blended-addressbar-page-top', `${Math.max(0, Math.round(top))}px`);
+  }
+
   function updatePaneCornerRadii() {
     paneCornerUpdateTimer = 0;
     updateSingleSidebarLayout();
+    updatePageTop();
 
     const tabpanels = chromeDoc.getElementById('tabbrowser-tabpanels');
     const tabbox = chromeDoc.getElementById('tabbrowser-tabbox');
@@ -209,6 +220,7 @@ var BlendedAddressbarModule = ((options) => {
     paneSidebarResizeObserver?.disconnect();
     paneSidebarModeObserver?.disconnect();
     chromeDoc.documentElement?.removeAttribute('data-blended-sidebar-column');
+    if (chromeDoc.documentElement) removeStylePropertyIfChanged(chromeDoc.documentElement.style, '--blended-addressbar-page-top');
     for (const property of ['height', 'left', 'width']) {
       const name = property === 'height' ? 'toolbar-height' : `page-${property}`;
       if (chromeDoc.documentElement) removeStylePropertyIfChanged(chromeDoc.documentElement.style, `--blended-addressbar-sidebar-${name}`);

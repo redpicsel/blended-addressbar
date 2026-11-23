@@ -11,7 +11,7 @@ This document describes the current adaptive color pipeline for Blended Addressb
 - `scripts/split-addressbars.js` owns the local address/reload controls. Browser events and frame-message routing stay in the chrome entry point.
 - `scripts/color-utils.js` owns color parsing, alpha visibility checks, contrast, and readable foreground selection.
 - `scripts/prefs.js` owns preference access and preference value normalization.
-- `scripts/pane-layout.js` owns split-pane/browser-frame corner radius observation and updates.
+- `scripts/pane-layout.js` owns split-pane/browser-frame corner radius observation and updates. The same pass publishes the selected page's top edge as `--blended-addressbar-page-top`, which window-fixed overlays such as Better Find Bar use to clear the addressbar.
 - `scripts/window-controls.js` moves the macOS window controls between Zen's addressbar row and the top of the full-height compact sidebar. It does not take part in color handling.
 - `scripts/theme-source-policy.js` owns color source policy metadata, confidence lookup, preferred semantic checks, and rendered-source checks.
 - `frame.js` runs in page content through a persistent frame listener. Chrome fetches it and `color-sampling.js` once from Sine, then loads both as data URLs into the same message-manager global scope; direct Sine chrome URLs did not initialize the helper in Zen's remote content process. Initialization is marked complete only after setup succeeds. It watches page theme mutations, prefers-color-scheme changes, load, and pageshow events, then sends lightweight color samples back to chrome. Scroll does not trigger color updates.

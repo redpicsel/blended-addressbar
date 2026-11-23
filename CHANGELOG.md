@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.36 - 2026-11-23
+
+- Keep Better Find Bar (`ff-better-findbar`) clear of the addressbar when it is set to the top. It is fixed 15px from the window's top, so the dual-toolbar addressbar row covered it. Those 15px now count from the selected page's top edge (`--blended-addressbar-page-top`), and in split view from below the pane's address field. The hidden bar still slides out of view, and the native find bar is unaffected.
+
 ## 1.7.35 - 2026-11-09
 
 - Tighten Essentials spacing to 6px across and down (was 8px). Tiles are 2px wider; columns are unchanged.
